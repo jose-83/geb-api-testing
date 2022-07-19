@@ -1,0 +1,105 @@
+plugins {
+    id 'groovy'
+    id 'java'
+    id "com.energizedwork.webdriver-binaries" version "1.4"
+    id "com.energizedwork.idea-base" version "1.4"
+    id "io.qameta.allure" version "2.8.1"
+}
+
+description ="""
+A project for a test automation solution using Geb, Groovy, and Spock
+"""
+
+group 'com.sabri.groovy.test.automation'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'groovy'
+apply plugin: 'project-report'
+
+
+repositories {
+    mavenCentral()
+}
+
+allure {
+    version = '2.8.1'
+    autoconfigure = true
+    aspectjweaver = true
+}
+
+ext {
+
+    drivers = ["firefox", "chrome", "remoteChrome", "remoteFirefox"]
+
+    ext {
+        groovyVersion = '2.4.15'
+        gebVersion = '2.2'
+        spockVersion = '1.1-groovy-2.4'
+        seleniumVersion = '3.14.0'
+        chromeDriverVersion = '103.0.5060.53'
+        geckoDriverVersion = '0.31.0'
+        restAssuredVersion = '3.2.0'
+        logbackVersion = '1.2.3'
+    }
+}
+
+dependencies {
+    testCompile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    testCompile "org.gebish:geb-spock:$gebVersion"
+    testCompile("org.spockframework:spock-core:$spockVersion") {
+        exclude group: "org.codehaus.groovy"
+    }
+    testCompile group: "org.seleniumhq.selenium", name: "selenium-support", version: "$seleniumVersion"
+    testCompile group: "org.seleniumhq.selenium", name: "selenium-firefox-driver", version: "$seleniumVersion"
+    testCompile group: "org.seleniumhq.selenium", name: "selenium-chrome-driver", version: "$seleniumVersion"
+    testCompile group: "io.rest-assured", name: "rest-assured", version: "$restAssuredVersion"
+    testCompile group: "ch.qos.logback", name: "logback-classic", version: "$logbackVersion"
+}
+
+webdriverBinaries {
+    chromedriver chromeDriverVersion
+    geckodriver geckoDriverVersion
+}
+
+tasks.withType(Test) {
+
+    group JavaBasePlugin.VERIFICATION_GROUP
+    outputs.upToDateWhen { false }
+
+    // system properties
+    systemProperty "geb.build.reportsDir", reporting.file("geb/$name")
+    systemProperty "remote.url", System.getProperty("remote.url", "http://%s:4444/wd/hub")
+    systemProperty "geb.env", System.getProperty("geb.env", "chrome")
+    systemProperty "host", System.getProperty("host", "localhost")
+    systemProperty "api.env", System.getProperty("api.env", "http://localhost:3030")
+    systemProperty "test.env", System.getProperty("test.env", "thoughtworks.com")
+
+    // defines included and excluded group of tests
+    def testGroups = new TestCategories(System.getProperty("group"))
+
+    useJUnit {
+        includeCategories testGroups.includedGroups()
+        excludeCategories testGroups.excludedGroups()
+    }
+
+    // sets parallel forks
+    maxParallelForks = 1
+
+    // sets heap size for the test JVM(s)
+    maxHeapSize = "1g"
+
+    // sets JVM arguments for the test JVM(s)
+    jvmArgs '-XX:MaxMetaspaceSize=128m'
+
+    // shows standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+    testLogging {
+        exceptionFormat = 'full'
+    }
+
+    finalizedBy 'allureReport'
+}
+
+tasks.withType(GroovyCompile) {
+    groovyOptions.forkOptions.memoryMaximumSize = '256m'
+}
