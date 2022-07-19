@@ -1,4 +1,4 @@
-# Durstexpress QA Task
+# E2E and API tests
 
 This project contains a few e2e tests and api tests which uses Gradle as a build automation tool.    
 
@@ -50,7 +50,7 @@ If you would like to run only e2e tests(ex. on Firefox), use:
  ./gradlew clean test -Dgroup=e2e -Dgeb.env=firefox
 ```
 
-## Running the tests using docker containers
+## Running the tests inside docker containers
 
 Make sure docker is up and running. Also, docker-compose must have been already installed.
 
