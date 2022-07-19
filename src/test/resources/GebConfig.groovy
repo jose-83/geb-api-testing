@@ -1,9 +1,7 @@
-import org.openqa.selenium.Dimension
-import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.remote.DesiredCapabilities
+import org.openqa.selenium.firefox.FirefoxOptions
 import org.openqa.selenium.remote.RemoteWebDriver
 
 import static java.lang.String.format
@@ -19,7 +17,6 @@ environments {
     URL remoteUrl = new URL(url)
     Integer windowWidth = 1680
     Integer windowHeight = 1050
-    Dimension dimension = new Dimension(windowWidth, windowHeight)
 
     chrome {
 
@@ -33,32 +30,27 @@ environments {
     firefox {
 
         driver = {
-            WebDriver webDriver = new FirefoxDriver()
-            webDriver.manage().window().setSize(dimension)
-            return webDriver
+            FirefoxOptions firefoxOptions = new FirefoxOptions()
+            firefoxOptions.addArguments("--window-size=${windowWidth},${windowHeight}")
+            new FirefoxDriver(firefoxOptions)
         }
     }
 
     remoteChrome {
 
         driver = {
-            DesiredCapabilities desiredCapabilities = DesiredCapabilities.chrome()
             ChromeOptions chromeOptions = new ChromeOptions()
             chromeOptions.addArguments("--window-size=${windowWidth},${windowHeight}")
-            desiredCapabilities.setCapability("idleTimeout", 720000)
-            desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions)
-            new RemoteWebDriver(remoteUrl, desiredCapabilities)
+            new RemoteWebDriver(remoteUrl, chromeOptions)
         }
     }
 
     remoteFirefox {
 
         driver = {
-            DesiredCapabilities desiredCapabilities = DesiredCapabilities.firefox()
-            desiredCapabilities.setCapability("idleTimeout", 720000)
-            WebDriver webDriver = new RemoteWebDriver(remoteUrl, desiredCapabilities)
-            webDriver.manage().window().setSize(dimension)
-            return webDriver
+            FirefoxOptions firefoxOptions = new FirefoxOptions()
+            firefoxOptions.addArguments("--window-size=${windowWidth},${windowHeight}")
+            new RemoteWebDriver(remoteUrl, firefoxOptions)
         }
     }
 }
