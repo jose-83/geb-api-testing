@@ -1,13 +1,14 @@
 package e2e.specs
 
 import e2e.pages.HomePage
+import e2e.pages.WhatWeDoPage
 import e2e.utils.categories.E2E
 import io.qameta.allure.Story
 import org.junit.experimental.categories.Category
 import spock.lang.Unroll
 
 @Category(E2E)
-class SearchSpec extends AbstractSpec {
+class SmokeSpec extends AbstractSpec {
 
     @Story("Story: Simple test")
     @Unroll
@@ -18,9 +19,9 @@ class SearchSpec extends AbstractSpec {
 
         when:
         step("WHEN the user navigates to what we do page")
-        homePage.navigateToWhatWeDo()
+        WhatWeDoPage whatWeDoPage = homePage.navigateToWhatWeDo()
 
         then:
-        1 == 1
+        whatWeDoPage.getTitle().contains("What we do")
     }
 }
